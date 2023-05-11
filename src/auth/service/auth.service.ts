@@ -7,13 +7,8 @@ import { UserDao } from '../respository/UserDao';
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService,private readonly userDao:UserDao) {}
-  // validate for jwt guard
-  async validateUserById(uid:string){
-    const user = { uid: 1, username: 'admin', password: '$2b$10$MBh1dRtjhA14tPZmBV7Hv.xCYmZlNSVZpsbGLIOr8aQntbwmYPk7m' };
-    // if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user;
-      return result;
-  }
+
+
   //validate for local username and password
   async validateUser(username: string, passwd: string): Promise<any> {
     const user:UserModel= await this.userDao.findByChannelUID(username);
@@ -47,8 +42,9 @@ export class AuthService {
       const payload = await this.jwtService.verify(token);
       return payload;
     } catch (err) {
-      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+     // throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
+    return null;
   }
   
 }

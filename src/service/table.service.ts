@@ -22,13 +22,13 @@ export class TableService  {
     
    
     sitDown = async (tableId: number, uid: string, seatNo: number) => {
- 
+        this.logger.log("tableId:"+tableId+";uid:"+uid+";seat:"+seatNo)
         const table = await this.tableDao.findTable(tableId);
   
         if (table) {
             let seat = table.seats.find((s) => s.no === seatNo);
             if (!seat) {
-                seat = { no: seatNo, uid: uid, chips: 0, status: 0 };
+                seat = { no: Number(seatNo), uid: uid, chips: 0, status: 0 };
                 table.seats.push(seat)
             } else if (!seat.uid) {
                 seat.uid = uid
@@ -40,10 +40,10 @@ export class TableService  {
                 const game = await this.gameService.createGame(table,0);
                 table.games = [game.gameId]
             }
- 
+            this.logger.log(table)
             await this.tableDao.updateTable(table);
             // await this.userDao.updateUser({ uid: uid, tableId: tableId })
-            //  this.eventService.sendEvent({ name: "sitDown", topic: "model",selector:{uid,tableId}, data: {tableId:table.id,...seat}, delay: 50 })
+             this.eventService.sendEvent({ name: "sitDown", topic: "model",selector:{uid,tableId}, data: {tableId:table.id,...seat}, delay: 50 })
         }
 
     }
@@ -59,11 +59,11 @@ export class TableService  {
             }
 
             await this.userDao.updateUser({ uid: uid, tableId: 0 })
-            this.eventService.sendEvent({ name: "updateUser", topic: "model",selector:{uid,tableId}, data: { tableId:0,uid }, delay: 50 })
+            this.eventService.sendEvent({ name: "leaveTable", topic: "model",selector:{uid,tableId}, data: { tableId:+tableId,uid }, delay: 10 })
 
         }
     }
-    standup = async (uid: string, tableId: number,seatNo:number) => {
+    standup = async (uid: string, tableId: number) => {
         const table = await this.tableDao.findTable(tableId);
         if (table) {
             const seat = table.seats.find((s)=>s.uid===uid);

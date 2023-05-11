@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { UserDao } from "src/auth/respository/UserDao";
 import { TableDao } from "src/respository/TableDao";
 import { TournamentDao } from "src/respository/TournamentDao";
 import { TableModel, TournamentModel } from "../model";
@@ -9,6 +10,7 @@ import { GameService } from "./game.service";
 export class TournamentService  {
     constructor(
         private readonly gameService:GameService,
+        private readonly userDao:UserDao,
         private readonly tableDao:TableDao,
         private readonly tournamentDao:TournamentDao,
         private readonly eventService:EventService
@@ -98,9 +100,10 @@ export class TournamentService  {
             }
             await this.tableDao.createTable(table);
         }
-        if(table)
-        this.eventService.sendEvent({ name: "joinTable", topic: "model",selector:{uid,tableId:table.id}, data: { tableId:0,uid }, delay: 50 })
-
+        if(table){
+            await this.userDao.updateUser({uid,tableId:table.id})
+            this.eventService.sendEvent({ name: "joinTable", topic: "model",selector:{uid,tableId:table.id}, data: { tableId:table.id,uid }, delay: 50 })
+        }
         return table
 
     }

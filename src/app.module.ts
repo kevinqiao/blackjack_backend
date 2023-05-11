@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GatewayModule } from './gateway/gateways.module';
@@ -29,12 +30,12 @@ import { PostgreSqlConnector } from './respository/postgresql.dbconnector';
 import { TableController } from './controller/table.controller';
 import { TableService } from './service/table.service';
 import { AuthModule } from './auth/auth.module';
-import { AuthService } from './auth/service/auth.service';
+
 
 
 
 @Module({
-  imports: [AuthModule,ScheduleModule.forRoot(), ConfigModule.forRoot(),GatewayModule],
+  imports: [AuthModule,CqrsModule,ScheduleModule.forRoot(), ConfigModule.forRoot(),GatewayModule],
   controllers: [AppController,TournamentController,TableController],
   providers: [
     AppService,

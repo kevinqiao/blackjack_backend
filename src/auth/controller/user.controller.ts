@@ -1,12 +1,17 @@
 import { Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
+import { JwtAuthGuard } from '../guard/jwt.guard';
+import { LocalAuthGuard } from '../guard/local.guard';
 import { UserModel } from '../respository/user.model';
 import { UserDao } from '../respository/UserDao';
 import { AuthService } from '../service/auth.service';
+import { Logger } from '@nestjs/common';
+import { CustomEvent } from 'src/event/custom.event';
 
-
-@Controller("user")
+@Controller("auth")
 export class UserController {
-  constructor(private readonly userDao:UserDao,private readonly authService:AuthService){
+  private logger: Logger = new Logger('AuthController');
+  constructor(private readonly userDao:UserDao,private readonly authService:AuthService,private readonly eventBus: EventBus){
 
   }
   @Get('load')
@@ -40,5 +45,26 @@ export class UserController {
         return JSON.stringify({...user,token})
       }
       return "password wrong"
+  }
+  @Post('password')
+  @UseGuards(LocalAuthGuard)
+  async login(@Req() req:any) {
+    const user = req.user;
+    const token = await this.authService.getAccessToken(req.user);
+    this.eventBus.publish(new CustomEvent("loginSuccess",user));
+    return {...user,token};  
+  }
+  @Get('token')
+  @UseGuards(JwtAuthGuard)
+  async signinByToken(@Req() req:any) {
+    this.logger.log(req.user)
+    const token = await this.authService.getAccessToken(req.user)
+    const user = await this.userDao.find(req.user.uid);
+    this.eventBus.publish(new CustomEvent("loginSuccess",user));
+    if(user){
+       delete user['password']
+       return {...user,token}
+    }
+    return 'This is a jwt guard response';
   }
 }

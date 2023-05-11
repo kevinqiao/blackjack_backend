@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
@@ -10,8 +11,10 @@ import { UserDao } from './respository/UserDao';
 import { PostgreSqlConnector } from './respository/postgresql.dbconnector';
 import { UserController } from './controller/user.controller';
 
+
 @Module({
   imports: [
+    CqrsModule,
     PassportModule,
     JwtModule.register({
       secret: 'mysecret',

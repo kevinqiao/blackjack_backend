@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { TableModel } from "../model";
-import { LocalStorage } from "node-localstorage";
 import { PostgreSqlConnector } from "./postgresql.dbconnector";
 @Injectable()
 export class TableDao{

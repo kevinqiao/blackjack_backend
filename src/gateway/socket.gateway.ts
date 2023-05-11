@@ -66,7 +66,8 @@ import { AuthService } from 'src/auth/service/auth.service';
     //   return data;
     // }
     async sendToClient(uid:string,data:any):Promise<void>{
-  
+      this.logger.log("sending to uid via socket:"+uid);
+      this.logger.log(data)
       const client = this.sockets.get(uid);
       if(client){
         client.emit("events",data)
