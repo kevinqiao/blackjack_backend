@@ -37,7 +37,7 @@ export class SettleGameProcessor {
                 game.status=2;
             }
             game.results = results;
-            this.eventService.sendEvent({ name: "settleGame", topic: "model", data: results, delay: 1000 });
+            this.eventService.sendEvent({ name: "settleGame", topic: "model",selector:{tableId:game.tableId}, data: results, delay: 1000 });
         }
    }
   

@@ -2,12 +2,13 @@
 import { Injectable } from "@nestjs/common";
 import { TurnDao } from "src/respository/TurnDao";
 import { ActionTurn } from "../model/game/ActionTurn";
-
+import { Logger } from '@nestjs/common';
 import { EventService } from "./event.service";
 
 
 @Injectable()
 export class TurnService {
+    private logger: Logger = new Logger('TurnService');
     constructor(
         private readonly eventService:EventService,
         private readonly turnDao:TurnDao
@@ -16,7 +17,7 @@ export class TurnService {
     }
 
     newActionTurn = async(turn:ActionTurn,delay:number):Promise<void>=> {
-  
+        this.logger.log(turn)
         if(turn?.expireTime){
             const timeout =turn.expireTime-Date.now()-delay;
             if(timeout>0){

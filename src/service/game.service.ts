@@ -1,6 +1,6 @@
 ;
 import { GameModel, SeatModel, TableModel, TableSeat, TournamentModel } from "../model";
-
+import { Logger } from '@nestjs/common';
 import {GameDao} from "../respository/GameDao"
 import {TableDao} from "../respository/TableDao";
 import { TurnService } from "./actTurn.service";
@@ -20,6 +20,7 @@ import { TurnDao } from "src/respository/TurnDao";
 
 @Injectable()
 export class GameService {
+    private logger: Logger = new Logger('GameService');
     constructor(
         private readonly turnService:TurnService,
         private readonly turnDao:TurnDao,
@@ -58,7 +59,7 @@ export class GameService {
                                     const ver = game.ver
                                     if(turn.round===0){
                                         const seats = game.seats.filter((s)=>s.bet>0);
-                                        console.log(seats)
+                                   
                                         if(seats?.length>0){
                                             this.launchProcessor.process(game)
                                         }else{
@@ -136,36 +137,41 @@ export class GameService {
         const gameData: GameModel = this.getInitGame(table);
         gameData.tournamentId = table.tournamentId;
         gameData.tableId = table.id;
-        // this.initGameProcessor.process(gameData,delay);
-        // console.log(gameData)
+        this.initGameProcessor.process(gameData,delay)
         await this.gameDao.create(gameData);
         return gameData
     }
 
-    deal = async (gameId: number, seatNo: number, chips: number) => {
+    deal = async (gameId: number, uid: string, chips: number) => {
        
         const gameObj: GameModel | null = await this.gameDao.findGame(gameId);
+       
         if (gameObj) {
-            this.dealProcessor.process(gameObj,seatNo,chips);
-            const ver = gameObj.ver;          
-            const allBet = gameObj.seats.filter((s)=>s.no<3&&!s.bet);
-            if(allBet?.length===0){                 
-                    this.launchProcessor.process(gameObj)
-                    if (gameObj.status === 1) {
-                        console.log("game over")
-                        setTimeout(() => this.settle(gameObj), 4000)
-                    }
+
+             const seat =gameObj.seats.find((s)=>s.uid===uid);
+            if(seat){
+                this.dealProcessor.process(gameObj,seat.no,chips);        
+                const allBet = gameObj.seats.filter((s)=>s.no<3&&!s.bet);
+                // this.logger.log(allBet)
+                if(allBet?.length===0){                 
+                        this.launchProcessor.process(gameObj)
+                        if (gameObj.status === 1) {
+                            console.log("game over")
+                            setTimeout(() => this.settle(gameObj), 4000)
+                        }
+                }
+                await this.gameDao.update(gameObj);
             }
-            await this.gameDao.update(gameObj);
         }
 
     }
 
-     hit = async (gameId: number) => {
+     hit = async (gameId: number,uid:string) => {
         const gameObj: GameModel | null = await this.gameDao.findGame(gameId);
 
-        if (gameObj) {
-            const ver = gameObj.ver;
+        const seat =gameObj.seats.find((s)=>s.uid===uid);
+        // this.logger.log(seat)
+        if(seat){
             this.hitProcessor.process(gameObj);
 
             if (gameObj.status === 1) {
@@ -176,10 +182,10 @@ export class GameService {
         }
 
     }
-   split = async (gameId: number) => {
+   split = async (gameId: number,uid:string) => {
         const gameObj: GameModel | null = await this.gameDao.findGame(gameId);
-        if (gameObj) {
-            const ver = gameObj.ver;
+        const seat =gameObj.seats.find((s)=>s.uid===uid);
+        if(seat){
             this.splitProcessor.process(gameObj);
             await this.gameDao.update(gameObj);
         }
@@ -193,11 +199,11 @@ export class GameService {
 
     }
 
-    stand =async  (gameId: number) => {
+    stand =async  (gameId: number,uid:string) => {
         const gameObj: GameModel | null = await this.gameDao.findGame(gameId);
-
-        if (gameObj) {
-            const ver = gameObj.ver;
+        const seat =gameObj.seats.find((s)=>s.uid===uid);
+        this.logger.log(seat)
+        if(seat){
             this.standProcessor.process(gameObj);
 
             if (gameObj.status === 1) {
@@ -211,20 +217,18 @@ export class GameService {
     settle = async (gameObj: GameModel) => {
         this.settleProcessor.process(gameObj);
         const table = await this.tableDao.findTable(gameObj.tableId);
-
         if (table) {
-             const tournament = await this.tournamentDao.findTournament(table.tournamentId)
+                    const tournament = await this.tournamentDao.findTournament(table.tournamentId)
           
                     if (tournament) {
                         if ((tournament.type === 0 && table.seats.filter((s) => s.no < 3).length > 0) || (tournament.type === 1 && table.games.length < tournament.rounds)) {
                             const newGame: GameModel = await  this.createGame(table,2000);
-                            
                             if (tournament.type === 0)
                                 table.games = [newGame.gameId]
                             else
                                 table.games.push(newGame.gameId)
                             await this.tableDao.updateTable(table);
-                        } else if(tournament.type===1&&table.games.length===tournament.rounds){
+                        } else{
                             this.settleTournamentProcessor.process(tournament, table)
                             //create  event "tournament over"
                         }

@@ -16,7 +16,7 @@ export class EventService implements IEventHandler<CustomEvent>  {
         // this.logger.log(event.data)
         if(event?.name==="loginSuccess"&&event.data.tableId){
             this.subscribeTable(event.data.uid,event.data.tableId)
-            console.log(this.tableSubscribers)
+            
         }
     }
     private subscribeTable=(uid:string,tableId:string)=>{
@@ -36,16 +36,16 @@ export class EventService implements IEventHandler<CustomEvent>  {
         }
     }
     sendEvent=(event:EventModel)=>{
-       this.logger.log(event);
+      
         if(event?.name==="joinTable"){
             this.logger.log(event.data)
             this.subscribeTable(event.selector.uid,event.selector.tableId+"")
-        }else if(event?.name==="leave"){
+        }else if(event?.name==="leaveTable"){
             this.unsubscribeTable(event.selector.uid,event.selector.tableId+"")
         }
-        this.logger.log(this.tableSubscribers);
+       
         const subscribers = this.tableSubscribers.get(event.selector.tableId+"");
-        this.logger.log(subscribers)
+       
         if(subscribers){
             for(const subscriber of subscribers){
                 delete event['selector']

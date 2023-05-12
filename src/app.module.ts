@@ -30,13 +30,14 @@ import { PostgreSqlConnector } from './respository/postgresql.dbconnector';
 import { TableController } from './controller/table.controller';
 import { TableService } from './service/table.service';
 import { AuthModule } from './auth/auth.module';
+import { GameController } from './controller/game.controller';
 
 
 
 
 @Module({
   imports: [AuthModule,CqrsModule,ScheduleModule.forRoot(), ConfigModule.forRoot(),GatewayModule],
-  controllers: [AppController,TournamentController,TableController],
+  controllers: [AppController,TournamentController,TableController,GameController],
   providers: [
     AppService,
     EventService,

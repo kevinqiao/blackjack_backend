@@ -37,7 +37,7 @@ import { AuthService } from 'src/auth/service/auth.service';
       let token:string =params['token']&&typeof params['token']==="string"?params['token']:null;
       if(token){
         const payload =  await  this.authService.verifyToken(token);
-        this.logger.log(payload)
+        // this.logger.log(payload)
         if(payload){
       // }
       // if(params['uid']&&Array.isArray(params['uid'])) 
@@ -46,7 +46,6 @@ import { AuthService } from 'src/auth/service/auth.service';
             const uid = payload.sub;
             this.sockets.set(uid,client);
             this.userMappings.set(client.id,uid);
-            console.log("connection created id:"+client.id+" for uid:"+uid)
         }
       }
 
@@ -66,8 +65,7 @@ import { AuthService } from 'src/auth/service/auth.service';
     //   return data;
     // }
     async sendToClient(uid:string,data:any):Promise<void>{
-      this.logger.log("sending to uid via socket:"+uid);
-      this.logger.log(data)
+     
       const client = this.sockets.get(uid);
       if(client){
         client.emit("events",data)

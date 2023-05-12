@@ -16,7 +16,6 @@ export class InitGameProcessor  {
     process = (game: GameModel,delay:number) => {
         game.cards=this.gameEngine.shuffle();
         const event: EventModel = { name: "initGame", topic: "model",selector:{tableId:game.tableId}, data: JSON.parse(JSON.stringify(game)), delay: delay }
-        // createEvent(event);
         this.eventService.sendEvent(event)
         const actionTurn: ActionTurn = { id: Date.now() + 2,gameId:game.gameId, round: 0, tableId:game.tableId, expireTime: Date.now() + Constants.TURN_INTERVAL + 500, seat: -1, data: null }
         game.currentTurn = actionTurn;

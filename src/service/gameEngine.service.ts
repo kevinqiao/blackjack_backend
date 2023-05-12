@@ -132,8 +132,8 @@ export class GameEngine{
                 return false;
             activeSlots[i]['cards'].push(card.no)
             seat.currentSlot = activeSlots[i].id;
-            this.eventService.sendEvent({ name: "openSlot", topic: "model", data: { seat: seat.no, slot: seat.currentSlot }, delay: Constants.DELAY_TURN_SLOT });
-            this.eventService.sendEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, slot: seat.currentSlot, no: card?.no }, delay: Constants.DELAY_TURN_SLOT + 200 })
+            this.eventService.sendEvent({ name: "openSlot", topic: "model",selector:{tableId:gameObj.tableId}, data: { seat: seat.no, slot: seat.currentSlot }, delay: Constants.DELAY_TURN_SLOT });
+            this.eventService.sendEvent({ name: "releaseCard", topic: "model", selector:{tableId:gameObj.tableId},data: { seat: seat.no, slot: seat.currentSlot, no: card?.no }, delay: Constants.DELAY_TURN_SLOT + 200 })
             Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL + 200 })
             this.turnService.newActionTurn(gameObj.currentTurn,Constants.DELAY_TURN_SLOT + 300);
             // createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: Constants.DELAY_TURN_SLOT + 300 });
@@ -159,7 +159,7 @@ export class GameEngine{
                 let card = this.releaseCard(gameObj, 3, dealerSeat.currentSlot);
                 if (!card)
                     break;
-                this.eventService.sendEvent({ name: "releaseCard", topic: "model", data: { seat: 3, no: card?.no }, delay: i * 800 })
+                this.eventService.sendEvent({ name: "releaseCard", topic: "model",selector:{tableId:gameObj.tableId}, data: { seat: 3, no: card?.no }, delay: i * 800 })
                 dealerSeat.slots[0]['cards'].push(card.no);
                 const dealerCards = gameObj.cards.filter((c) => dealerSeat.slots[0]['cards'].includes(c.no));
                 const scores = this.getHandScore(dealerCards);
@@ -195,8 +195,8 @@ export class GameEngine{
                 if (card) {
                     card.seat = seat.no;
                     currentSlot.cards.push(card.no);
-                    this.eventService.sendEvent({ name: "splitSlot", topic: "model", data: { seat: seat.no, slot: newSlot }, delay: 10 });
-                    this.eventService.sendEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card.no }, delay: 500 });
+                    this.eventService.sendEvent({ name: "splitSlot", topic: "model",selector:{tableId:gameObj.tableId}, data: { seat: seat.no, slot: newSlot }, delay: 10 });
+                    this.eventService.sendEvent({ name: "releaseCard", topic: "model", selector:{tableId:gameObj.tableId},data: { seat: seat.no, no: card.no }, delay: 500 });
                     Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, seat: seat.no })
                     this.turnService.newActionTurn(gameObj.currentTurn,1000);
    

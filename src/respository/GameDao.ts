@@ -11,15 +11,13 @@ export class GameDao {
    const client = await pool.connect();
    try {
      await client.query('BEGIN');
-     this.logger.log("update game")
-     this.logger.log(data)
      // Lock the row for update
      const lockQuery = 'SELECT * FROM game WHERE id = $1 FOR UPDATE';
      await client.query(lockQuery, [data.gameId]);
  
      // Update the row with new JSON data
      const updateQuery = 'UPDATE game SET data = $1 WHERE id = $2';
-     await client.query(updateQuery, [data, data.gamId]);
+     await client.query(updateQuery, [data, data.gameId]);
  
      // Commit the transaction
      await client.query('COMMIT');
@@ -68,7 +66,7 @@ export class GameDao {
     try {
       const result = await client.query('SELECT * FROM game where id=$1',[gameId]); 
       if(result.rows.length>0)
-        return  result.rows[0]
+        return  result.rows[0].data
     } catch (err) {
       console.error('Error:', err);
     } finally {

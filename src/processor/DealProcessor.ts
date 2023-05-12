@@ -16,7 +16,7 @@ export class DealProcessor {
         if(seat&&chips>0){
             console.log("deal processing at seat:"+seatNo+" with chips:"+chips)
             seat.bet=chips;
-            const event: EventModel = { name: "placeBet", topic: "model", data:{seatNo:seatNo,chips:chips}, delay: 0 }
+            const event: EventModel = { name: "placeBet", topic: "model", selector:{uid:seat.uid,tableId:game.tableId},data:{seatNo:seatNo,chips:chips}, delay: 0 }
             this.eventService.sendEvent(event)
        }
     }

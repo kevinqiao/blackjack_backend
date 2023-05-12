@@ -1,22 +1,25 @@
 import { Injectable } from "@nestjs/common";
 import { ActionTurn } from "../model";
-import { LocalStorage } from "node-localstorage";
+import { Logger } from '@nestjs/common';
 import { PostgreSqlConnector } from "./postgresql.dbconnector";
 @Injectable()
 export class TurnDao {
+  private logger: Logger = new Logger('TurnDao');
   constructor(private readonly postsqlConnector:PostgreSqlConnector){}
   update =async (data: any) => {
+  this.logger.log(data)
    const pool = this.postsqlConnector.getConnection();
    const client = await pool.connect();
    try {
      await client.query('BEGIN');
      // Lock the row for update
-     const lockQuery = 'SELECT * FROM act_turn WHERE gameId = $1 FOR UPDATE';
-     await client.query(lockQuery, [data.id]);
+
+     const lockQuery = 'SELECT * FROM act_turn WHERE gameid = $1 FOR UPDATE';
+     await client.query(lockQuery, [data.gameId]);
  
      // Update the row with new JSON data
-     const updateQuery = 'UPDATE act_turn SET expireTime = $1 and data = $2 WHERE gameId = $3';
-     await client.query(updateQuery, [data.expireTime, data, data.gameId]);
+     const updateQuery = 'UPDATE act_turn SET data = $1,expireTime=$2 WHERE gameid = $3';
+     await client.query(updateQuery, [data, data.expireTime,data.gameId]);
  
      // Commit the transaction
      await client.query('COMMIT');
@@ -38,13 +41,13 @@ export class TurnDao {
    
      await client.query(`
        CREATE TABLE IF NOT EXISTS act_turn (
-         gameId bigint PRIMARY KEY,
-         expireTime bigint,
+         gameid bigint PRIMARY KEY,
+         expiretime bigint,
          data JSONB
        );
      `);
      await client.query(
-       'INSERT INTO  act_turn (gameId,expireTime,data) VALUES ($1,$2,$3)',
+       'INSERT INTO  act_turn (gameid,expiretime,data) VALUES ($1,$2,$3)',
        [turn.gameId,turn.expireTime,JSON.stringify(turn)]
      );
  

@@ -40,7 +40,6 @@ export class TableService  {
                 const game = await this.gameService.createGame(table,0);
                 table.games = [game.gameId]
             }
-            this.logger.log(table)
             await this.tableDao.updateTable(table);
             // await this.userDao.updateUser({ uid: uid, tableId: tableId })
              this.eventService.sendEvent({ name: "sitDown", topic: "model",selector:{uid,tableId}, data: {tableId:table.id,...seat}, delay: 50 })
