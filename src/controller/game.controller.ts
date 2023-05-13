@@ -1,17 +1,29 @@
 import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { TableModel } from 'src/model';
 import { GameDao } from 'src/respository/GameDao';
-import { EventService } from 'src/service/event.service';
+import { TableDao } from 'src/respository/TableDao';
 import { GameService } from 'src/service/game.service';
 
 @Controller("game")
 export class GameController {
   private logger: Logger = new Logger('GameController');
-  constructor(private readonly gameService: GameService,private readonly gameDao:GameDao) {
-    
+  constructor(private readonly gameService: GameService,private readonly gameDao:GameDao,private readonly tableDao:TableDao) {
+   
   }
-
+  @Get("table/:tableId")
+  @UseGuards(JwtAuthGuard)
+  async findByTable(@Req() req, @Param() params: any):Promise<string>{
+    const table:TableModel =await  this.tableDao.findTable(params.tableId);
+    if(table&&table.games.length>0){
+         const gameId = table.games[table.games.length-1];
+         const game = await this.gameDao.findGame(+gameId);
+         if(game)
+            return JSON.stringify({ok:true,message:game})
+    }
+    return JSON.stringify({ok:false})
+  }
   @Get("find/:gameId")
   @UseGuards(JwtAuthGuard)
   async findOne(@Req() req, @Param() params: any):Promise<string>{

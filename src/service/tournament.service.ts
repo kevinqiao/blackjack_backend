@@ -9,7 +9,6 @@ import { GameService } from "./game.service";
 @Injectable()
 export class TournamentService  {
     constructor(
-        private readonly gameService:GameService,
         private readonly userDao:UserDao,
         private readonly tableDao:TableDao,
         private readonly tournamentDao:TournamentDao,
@@ -23,17 +22,12 @@ export class TournamentService  {
           const tournament: TournamentModel = {
             id: Date.now() + i * 1000 + i,
             type: 0,//0-free 1-sigo 2-world 3-friend
-            buyInAmount: 0,
-            rewards: [],
-            buyInAsset: 0,
-            rewardAsset: 0,
             startingStack: 0,
             minPlayers: 1,
             rounds: 1,
             minBet: (i + 1) * 50,
             maxBet: (i + 1) * 150,
             status: 0,
-            ver: 0
           }
           tournaments.push(tournament);
         }
@@ -41,17 +35,12 @@ export class TournamentService  {
           const tournament: TournamentModel = {
             id: Date.now() + i * 2000 + (i + 6),
             type: 1,//0-free 1-sigo 2-friend
-            buyInAmount: 100,
-            rewards: [],
-            buyInAsset: 0,
-            rewardAsset: 0,
             startingStack: 1200,
             minPlayers: 3,
             rounds: 4,
             minBet: (i + 1) * 50,
             maxBet: (i + 1) * 150,
             status: 0,
-            ver: 0
           }
           tournaments.push(tournament);
         }
