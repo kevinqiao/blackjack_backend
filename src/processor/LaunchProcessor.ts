@@ -6,9 +6,6 @@ import { GameEngine } from "src/service/gameEngine.service";
 import { CardModel, SeatModel,ActionTurn,GameModel } from "../model";
 import { Logger } from '@nestjs/common';
 import Constants from "../model/Constants";
-import { FileFieldsInterceptor } from "@nestjs/platform-express";
-
-
 
 @Injectable()
 export class LaunchProcessor {
@@ -84,6 +81,7 @@ export class LaunchProcessor {
         // startSeat = game.seats.find((s) => s.no === game.startSeat);
         // this.logger.log(startSeat)
         if (firstTurnSeat) {
+            // this.logger.log(firstTurnSeat)
             if (firstTurnSeat.status === 0) {
                 time = time + 100;
                 const actionTurn: ActionTurn = { id: Date.now() + 2,gameId:game.gameId, round: 1, tableId:game.tableId, expireTime: Date.now() + Constants.TURN_INTERVAL +time, seat: firstTurnSeat.no, data: null }

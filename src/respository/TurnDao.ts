@@ -7,7 +7,7 @@ export class TurnDao {
   private logger: Logger = new Logger('TurnDao');
   constructor(private readonly postsqlConnector:PostgreSqlConnector){}
   update =async (data: any) => {
-  this.logger.log(data)
+  
    const pool = this.postsqlConnector.getConnection();
    const client = await pool.connect();
    try {
@@ -23,7 +23,7 @@ export class TurnDao {
  
      // Commit the transaction
      await client.query('COMMIT');
-     console.log('Updated act turn data for game:', data.gameId);
+  
    } catch (error) {
      await client.query('ROLLBACK');
      console.error('Error updating JSON data:', error);

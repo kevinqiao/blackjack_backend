@@ -4,10 +4,11 @@ import { PostgreSqlConnector } from 'src/respository/postgresql.dbconnector';
 import { TableDao } from 'src/respository/TableDao';
 import { TableService } from 'src/service/table.service';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { UserDao } from 'src/auth/respository/UserDao';
 @Controller("table")
 export class TableController {
   private logger: Logger = new Logger('TableController');
-  constructor(private readonly tableService: TableService,private readonly tableDao:TableDao,private readonly postsqlConnector:PostgreSqlConnector) {
+  constructor(private readonly userDao:UserDao,private readonly tableService: TableService,private readonly tableDao:TableDao,private readonly postsqlConnector:PostgreSqlConnector) {
     //  tournamentDao.initTournaments();
   }
 

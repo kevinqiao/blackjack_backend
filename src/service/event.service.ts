@@ -13,7 +13,7 @@ export class EventService implements IEventHandler<CustomEvent>  {
     
     }
     handle(event: CustomEvent) {
-        // this.logger.log(event.data)
+ 
         if(event?.name==="loginSuccess"&&event.data.tableId){
             this.subscribeTable(event.data.uid,event.data.tableId)
             
@@ -23,29 +23,27 @@ export class EventService implements IEventHandler<CustomEvent>  {
         let subscribers:string[] = this.tableSubscribers.get(tableId);
         if(!subscribers){
           subscribers=[];
-          this.tableSubscribers.set(tableId,subscribers)
+          this.tableSubscribers.set(tableId+"",subscribers)
         }
         if(!subscribers.includes(uid)){
             subscribers.push(uid)
         }
     }
     private unsubscribeTable=(uid:string,tableId:string)=>{
-        const subscribers:string[] = this.tableSubscribers.get(tableId);
+        const subscribers:string[] = this.tableSubscribers.get(tableId+"");
         if(subscribers&&!subscribers.includes(uid)){
             subscribers.push(uid)
         }
     }
     sendEvent=(event:EventModel)=>{
-      
+        // if(event?.name!=="initGame")
+        //    console.log(event)
         if(event?.name==="joinTable"){
-            this.logger.log(event.data)
             this.subscribeTable(event.selector.uid,event.selector.tableId+"")
         }else if(event?.name==="leaveTable"){
             this.unsubscribeTable(event.selector.uid,event.selector.tableId+"")
-        }
-       
-        const subscribers = this.tableSubscribers.get(event.selector.tableId+"");
-       
+        }       
+        const subscribers = this.tableSubscribers.get(event.selector.tableId+"");    
         if(subscribers){
             for(const subscriber of subscribers){
                 delete event['selector']

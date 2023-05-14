@@ -3,7 +3,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GatewayModule } from './gateway/gateways.module';
-import { AppController } from './controller/app.controller';
 import { AppService } from './service/app.service';
 import { EventService } from './service/event.service';
 import { GameService } from './service/game.service';
@@ -37,7 +36,7 @@ import { GameController } from './controller/game.controller';
 
 @Module({
   imports: [AuthModule,CqrsModule,ScheduleModule.forRoot(), ConfigModule.forRoot(),GatewayModule],
-  controllers: [AppController,TournamentController,TableController,GameController],
+  controllers: [TournamentController,TableController,GameController],
   providers: [
     AppService,
     EventService,

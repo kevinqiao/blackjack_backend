@@ -13,7 +13,6 @@ export class InsureProcessor {
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
         if (!seat)
             return null;
-        seat.acted.push(ActionType.INSURE)
        
     }
 

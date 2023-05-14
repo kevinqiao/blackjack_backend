@@ -21,6 +21,7 @@ import { TurnDao } from "src/respository/TurnDao";
 @Injectable()
 export class GameService {
     private logger: Logger = new Logger('GameService');
+    private interval: NodeJS.Timeout;
     constructor(
         private readonly turnService:TurnService,
         private readonly turnDao:TurnDao,
@@ -41,45 +42,61 @@ export class GameService {
         private readonly  notActProcessor:NotActProcessor,
 
         ) {
-    
+        this.startTask();
     }
 
+
+    startTask(): void {
+     if(!this.interval)
+            this.interval = setInterval(async () => {
+                try{
+                await this.autoAct();
+                }catch(err){
+                    this.logger.log(err)
+                }
+                // console.log('Task executed in Game Service');
+            }, 5000); // Execute the task every 1 second
+    }
+  
+    stopTask(): void {
+     if(this.interval)
+       clearInterval(this.interval);
+    }
 
      autoAct= async ()=>{    
         if(this.turnService){
            this.turnDao.findAllDue().then((turns)=>{
-          
-       
-               
+                this.logger.log(turns)
+
                 for(let turn of turns){
                         this.gameDao.findGame(turn.gameId).then((game)=>{
                                 if(game){
-                                    
-                                    this.notActProcessor.process(game)
-                                    const ver = game.ver
+                                    this.notActProcessor.process(game)  
                                     if(turn.round===0){
                                         const seats = game.seats.filter((s)=>s.bet>0);
-                                   
                                         if(seats?.length>0){
                                             this.launchProcessor.process(game)
+                                            this.gameDao.update(game).then(()=>{})
                                         }else{
                                             this.turnService.stopCount(game.gameId)
                                             this.settle(game)
                                         }
                                     }else if(turn.round===1){
-                                        const remainTime = turn.expireTime-Date.now();
-
-                                        if(remainTime<0&&turn.seat===game.currentTurn.seat){
-                                        
-                                            this.standProcessor.process(game);
-                                            if (game.status === 1) {
-                                                console.log("game over")
-                                                // turnService.stopCount(game.gameId)
-                                                setTimeout(() => this.settle(game), 4000)
-                                            } 
-                                        } 
+                                        const seat = game.seats.find((s)=>s.no===game.currentTurn.seat);
+                                        if(seat){
+                                            this.stand(game.gameId,seat.uid);
+                                        }
+                                        // const remainTime = turn.expireTime-Date.now();
+                                        // if(remainTime<0&&turn.seat===game.currentTurn.seat){                                        
+                                        //     this.standProcessor.process(game);
+                                        //     if (game.status === 1) {
+                                        //         console.log("game over")
+                                        //         // turnService.stopCount(game.gameId)
+                                        //         setTimeout(() => this.settle(game), 4000)
+                                        //     } 
+                                        // } 
                                     }
-                                    this.gameDao.update(game).then(()=>{})
+                                  
                                 }
                         })
                 }
@@ -114,7 +131,6 @@ export class GameService {
                     no: tableSeat.no,
                     uid: tableSeat.uid,
                     status: 0,
-                    acted: [],
                     bet: 0,
                     insurance: 0,
                     currentSlot: currentSlotId++,
@@ -126,7 +142,7 @@ export class GameService {
             }
         }
         currentSlotId++;
-        const dealer: SeatModel = { no: 3, uid: null, status: 0, acted: [], bet: 0, insurance: 0, currentSlot: currentSlotId, slots: [{ id: currentSlotId, cards: [], status: 0, score: 0 }] }
+        const dealer: SeatModel = { no: 3, uid: null, status: 0, bet: 0, insurance: 0, currentSlot: currentSlotId, slots: [{ id: currentSlotId, cards: [], status: 0, score: 0 }] }
         initData.seats.push(dealer)
         return initData;
 
@@ -155,6 +171,7 @@ export class GameService {
                 // this.logger.log(allBet)
                 if(allBet?.length===0){                 
                         this.launchProcessor.process(gameObj)
+                        this.logger.log(gameObj.currentTurn)
                         if (gameObj.status === 1) {
                             console.log("game over")
                             setTimeout(() => this.settle(gameObj), 4000)

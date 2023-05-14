@@ -17,7 +17,7 @@ export class TurnService {
     }
 
     newActionTurn = async(turn:ActionTurn,delay:number):Promise<void>=> {
-        this.logger.log(turn)
+  
         if(turn?.expireTime){
             const timeout =turn.expireTime-Date.now()-delay;
             if(timeout>0){

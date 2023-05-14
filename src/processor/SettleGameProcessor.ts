@@ -1,5 +1,5 @@
 
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { EventService } from "src/service/event.service";
 import { GameEngine } from "src/service/gameEngine.service";
 import { TournamentModel,SlotBattleResult,GameModel} from "../model";
@@ -7,6 +7,7 @@ import { TournamentModel,SlotBattleResult,GameModel} from "../model";
 
 @Injectable()
 export class SettleGameProcessor {
+    private logger: Logger = new Logger('Settle Game Processor');
     constructor(
         private readonly gameEngine:GameEngine,
         private readonly eventService:EventService
@@ -16,6 +17,8 @@ export class SettleGameProcessor {
         //     createEvent({ name: "clearGame", topic: "model", data: {gameId:game.gameId}, delay: 1000 });
         //     return;
         // }
+        if(game.currentTurn.round===0)
+         return 
         const dealerSeat = game.seats.find((s) => s.no === 3);
         if (dealerSeat) {
             const results: SlotBattleResult[] = [];

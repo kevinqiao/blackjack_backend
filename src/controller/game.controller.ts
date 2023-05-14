@@ -1,15 +1,18 @@
 import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { UserModel } from 'src/auth/respository/user.model';
+import { UserDao } from 'src/auth/respository/UserDao';
 import { TableModel } from 'src/model';
 import { GameDao } from 'src/respository/GameDao';
 import { TableDao } from 'src/respository/TableDao';
 import { GameService } from 'src/service/game.service';
+import { TableService } from 'src/service/table.service';
 
 @Controller("game")
 export class GameController {
   private logger: Logger = new Logger('GameController');
-  constructor(private readonly gameService: GameService,private readonly gameDao:GameDao,private readonly tableDao:TableDao) {
+  constructor(private userDao:UserDao,private readonly gameService: GameService,private tableService:TableService,private readonly gameDao:GameDao,private readonly tableDao:TableDao) {
    
   }
   @Get("table/:tableId")
@@ -42,10 +45,16 @@ export class GameController {
   @UseGuards(JwtAuthGuard)
   async hit(@Req() req, @Param() params: any):Promise<string>{
      this.logger.log(req.user)
+
+          
      if(params.gameId){
          this.logger.log("hit card....")
         await this.gameService.hit(params.gameId,req.user.uid);
      }
+     this.userDao.find(req.user.uid).then((user)=>{
+      if(user&&user.tableId)
+        this.tableService.reset(user.uid,user.tableId).then(()=>console.log("clear unact for seat"))
+     })
     return ""
   }
   @Get("split/:gameId")
@@ -66,6 +75,11 @@ export class GameController {
          this.logger.log("stand....")
         await this.gameService.stand(params.gameId,req.user.uid);
      }
+     this.userDao.find(req.user.uid).then((user)=>{
+      if(user&&user.tableId)
+        this.tableService.reset(user.uid,user.tableId).then(()=>console.log("clear unact for seat"))
+     })
     return ""
   }
+  
 }

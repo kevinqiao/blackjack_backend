@@ -2,7 +2,6 @@
 import { EventService } from "src/service/event.service";
 import { GameEngine } from "src/service/gameEngine.service";
 import { SeatBetSlot, SeatModel,GameModel} from "../model";
-import ActionType from "../model/game/ActionType";
 
 export class DoubleProcessor{
     constructor(
@@ -22,7 +21,6 @@ export class DoubleProcessor{
                 currentSlot.cards.push(card.no)
                 this.eventService.sendEvent({ name: "releaseCard", topic: "model", data, delay: 0 });
             }
-            seat.acted.push(ActionType.DOUBLE)
             this.eventService.sendEvent({
                 name: "doubleBet", topic: "model", data: { seatNo: seat.no }, delay: 10
             })
